@@ -6,8 +6,8 @@ sudo apt upgrade -y
 echo "utilisateur detecteé :$username_system"
 username_system="${SUDO_USER:-$(whoami)}" 
 
-mkdir -p "/home/$username_system/docker/n8n"
-mkdir -p "/home/$username_system/docker/n8n/{postgresql,n8n_data,n8n_files}"
+mkdir -p /home/$username_system/docker/n8n
+mkdir -p /home/$username_system/docker/n8n/{postgresql,n8n_data,n8n_files}
 cd /home/$username_system/docker/n8n/
 touch .env
 ip_nas=$(hostname -I | awk '{print $1}')
