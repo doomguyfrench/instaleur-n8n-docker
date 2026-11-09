@@ -5,7 +5,7 @@ sudo apt update -y
 sudo apt upgrade -y
 username_system="${SUDO_USER:-$(whoami)}" 
 echo "utilisateur detecteé :$username_system"
-sudo groupadd -g  N8Nuser
+sudo groupadd  N8Nuser
 sudo usermod -aG N8Nuser "$username_system"
 
 mkdir -p /home/$username_system/docker/n8n
@@ -17,8 +17,8 @@ cat > .env << 'EOF'
 ---
 # Configuration globale de n8n
 N8N_HOST=n8n.it-connect.local
-N8N_WEBHOOK_URL=http://n8n.it-connect.local
-N8N_WEBHOOK_TUNNEL_URL=http://n8n
+N8N_WEBHOOK_URL=
+N8N_WEBHOOK_TUNNEL_URL=
 N8N_PROTOCOL=http
 N8N_SECURE_COOKIE=false
 N8N_GENERIC_TIMEZONE=Europe/Paris
@@ -29,7 +29,6 @@ POSTGRES_USER=n8n_user
 POSTGRES_PASSWORD=PASSWORD
 EOF
 
-source
 
 touch "docker-compose.yml"
 cat > docker-compose.yml <<'EOF'
@@ -87,7 +86,7 @@ services:
         condition: service_healthy
 EOF
 
-sudo chown : N8Nuser n8n_data/
+sudo chown :N8Nuser n8n_data/
 sudo chmod 755 n8n_data/
 
 sudo docker compose up -d
