@@ -3,6 +3,7 @@ echo "voici l instaltion de n8n "
 echo "VOUS DEVEZ INSTALLEZ DABORT LE SCRIPT DE NAS "
 sudo apt update -y
 sudo apt upgrade -y
+set -euo pipefail
 username_system="${SUDO_USER:-$(whoami)}" 
 echo "utilisateur detecteé :$username_system"
 sudo groupadd  N8Nuser
@@ -13,7 +14,7 @@ mkdir -p /home/$username_system/docker/n8n/{postgresql,n8n_data,n8n_files}
 cd /home/$username_system/docker/n8n/
 touch .env
 ip_nas=$(hostname -I | awk '{print $1}')
-cat > .env << 'EOF'
+cat > .env << EOF
 ---
 # Configuration globale de n8n
 N8N_HOST=n8n.it-connect.local
@@ -28,7 +29,6 @@ POSTGRES_DB=n8n
 POSTGRES_USER=n8n_user
 POSTGRES_PASSWORD=PASSWORD
 EOF
-set -euo pipefail
 
 touch "docker-compose.yml"
 cat > docker-compose.yml <<'EOF'
@@ -85,7 +85,6 @@ services:
       postgres:
         condition: service_healthy
 EOF
-set -euo pipefail
 
 sudo chown :N8Nuser n8n_data/ n8n_files postgresql
 sudo chmod 755 n8n_data/ n8n_files postgresql
