@@ -4,20 +4,30 @@ echo "VOUS DEVEZ INSTALLEZ DABORT LE SCRIPT DE NAS "
 sudo apt update -y
 sudo apt upgrade -y
 set -euo pipefail
+ip_nas=$(hostname -I | awk '{print $1}')
+
 username_system="${SUDO_USER:-$(whoami)}" 
 echo "utilisateur detecteé :$username_system"
 sudo groupadd  N8Nuser
+
 sudo usermod -aG N8Nuser "$username_system"
+
+N8N_UID=$(docker run --rm --entrypoint id docker.n8n.io/n8nio/n8n -u)
+N8N_UID=$(docker run --rm --entrypoint id docker.n8n.io/n8nio/n8n -g)
+
+echo "n8n UID: $N8N_UID"
+echo "n8n GID: $N8N_GID"
+
+PASSWORD=$(openssl rand _hex 32)
 
 mkdir -p "/home/$username_system/docker/n8n"
 mkdir -p /home/$username_system/docker/n8n/{postgresql,n8n_data,n8n_files}
 cd /home/$username_system/docker/n8n/
 touch .env
-ip_nas=$(hostname -I | awk '{print $1}')
 cat > .env << EOF
 ---
 # Configuration globale de n8n
-N8N_HOST=n8n.it-connect.local
+N8N_HOST=
 N8N_WEBHOOK_URL=${ip_nas}
 N8N_WEBHOOK_TUNNEL_URL=http://${ip_nas}:5678
 N8N_PROTOCOL=http
@@ -27,7 +37,7 @@ N8N_GENERIC_TIMEZONE=Europe/Paris
 # Configuration de PostgreSQL
 POSTGRES_DB=n8n
 POSTGRES_USER=n8n_user
-POSTGRES_PASSWORD=PASSWORD
+POSTGRES_PASSWORD=$PASSWORD
 EOF
 
 touch "docker-compose.yml"
@@ -88,6 +98,7 @@ EOF
 
 sudo chown :N8Nuser n8n_data/ n8n_files postgresql
 sudo chmod 755 n8n_data/ n8n_files postgresql
+sudo chmod 600 .env
 
 sudo docker compose up -d
 
