@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+umask 077
 echo "voici l instaltion de n8n "
 
 echo "VOUS DEVEZ INSTALLEZ DABORT LE SCRIPT DE NAS "
@@ -19,16 +20,24 @@ N8N_GID=$(docker run --rm --entrypoint id docker.n8n.io/n8nio/n8n -g)
 echo "n8n UID: $N8N_UID"
 echo "n8n GID: $N8N_GID"
 
-PASSWORD=$(openssl rand -hex 32)
 
 mkdir -p "/home/$username_system/docker/n8n"
 mkdir -p /home/$username_system/docker/n8n/{postgresql,n8n_data,n8n_files}
 cd /home/$username_system/docker/n8n/
-touch .env
-cat > .env << EOF
+if [[-f .env ]]; then
+  echo"cofniguration existante détécté,conservatioon du mots de passe"
+else
+  PASSWORD=$(openssl rand -hex 32)
+  touch .env
+  cat > .env << EOF
+
+
+
+
+
 # Configuration globale de n8n
 N8N_HOST=${ip_nas}
-N8N_WEBHOOK_URL=http:$}//{ip_nas:5678/
+N8N_WEBHOOK_URL=http://${ip_nas}:5678/
 N8N_PROTOCOL=http
 N8N_SECURE_COOKIE=false
 N8N_GENERIC_TIMEZONE=Europe/Paris
@@ -38,6 +47,8 @@ POSTGRES_DB=n8n
 POSTGRES_USER=n8n_user
 POSTGRES_PASSWORD=$PASSWORD
 EOF
+fi 
+
 
 touch "docker-compose.yml"
 cat > docker-compose.yml <<'EOF'
