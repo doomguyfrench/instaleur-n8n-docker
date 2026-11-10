@@ -9,9 +9,7 @@ ip_nas=$(hostname -I | awk '{print $1}')
 
 username_system="${SUDO_USER:-$(whoami)}" 
 echo "utilisateur detecteé :$username_system"
-sudo groupadd  N8Nuser
 
-sudo usermod -aG N8Nuser "$username_system"
 
 N8N_UID=$(docker run --rm --entrypoint id docker.n8n.io/n8nio/n8n -u)
 N8N_GID=$(docker run --rm --entrypoint id docker.n8n.io/n8nio/n8n -g)
@@ -28,10 +26,9 @@ mkdir -p /home/$username_system/docker/n8n/{postgresql,n8n_data,n8n_files}
 cd /home/$username_system/docker/n8n/
 touch .env
 cat > .env << EOF
----
 # Configuration globale de n8n
 N8N_HOST=${ip_nas}
-N8N_WEBHOOK_URL=http:${ip_nas}//:5678
+N8N_WEBHOOK_URL=http:$}//{ip_nas:5678/
 N8N_PROTOCOL=http
 N8N_SECURE_COOKIE=false
 N8N_GENERIC_TIMEZONE=Europe/Paris
