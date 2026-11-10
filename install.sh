@@ -24,11 +24,11 @@ echo "n8n GID: $N8N_GID"
 mkdir -p "/home/$username_system/docker/n8n"
 mkdir -p /home/$username_system/docker/n8n/{postgresql,n8n_data,n8n_files}
 cd /home/$username_system/docker/n8n/
-if [[-f .env ]]; then
+if [[ -f .env ]]; then
   echo"cofniguration existante détécté,conservatioon du mots de passe"
 else
   PASSWORD=$(openssl rand -hex 32)
-  touch .env
+  
   cat > .env << EOF
 
 
