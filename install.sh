@@ -10,11 +10,13 @@ ip_nas=$(hostname -I | awk '{print $1}')
 
 username_system="${SUDO_USER:-$(whoami)}" 
 echo "utilisateur detecteé :$username_system"
+sudo groupadd -f N8Nuser
+
 
 
 N8N_UID=$(docker run --rm --entrypoint id docker.n8n.io/n8nio/n8n -u)
 N8N_GID=$(docker run --rm --entrypoint id docker.n8n.io/n8nio/n8n -g)
-
+N8N_GROUP_ID=$(getnet group N8Nuser | cut -d: -f3)
 
 
 echo "n8n UID: $N8N_UID"
@@ -25,10 +27,10 @@ mkdir -p "/home/$username_system/docker/n8n"
 mkdir -p /home/$username_system/docker/n8n/{postgresql,n8n_data,n8n_files}
 cd /home/$username_system/docker/n8n/
 if [[ -f .env ]]; then
-  echo"cofniguration existante détécté,conservatioon du mots de passe"
+  echo "cofniguration existante détécté,conservatioon du mots de passe"
 else
   PASSWORD=$(openssl rand -hex 32)
-  
+
   cat > .env << EOF
 
 
@@ -80,6 +82,8 @@ services:
     restart: always
     ports:
       - "5678:5678"
+    group_add:
+      -"${N8N_GROUP¨_ID}"
     environment:
       N8N_HOST: ${N8N_HOST}
       N8N_PORT: 5678
@@ -105,8 +109,8 @@ services:
         condition: service_healthy
 EOF
 
-sudo chown -R "$N8N_UID:$N8N_GID" n8n_data/ n8n_files 
-sudo chmod 755  n8n_data/ n8n_files 
+sudo chown -R "$N8N_UID:$N8N_GROUP_ID" n8n_data/ n8n_files 
+sudo chmod 2770  n8n_data/ n8n_files 
 sudo chmod 600 .env
 
 sudo docker compose up -d
