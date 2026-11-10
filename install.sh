@@ -31,7 +31,7 @@ cat > .env << EOF
 ---
 # Configuration globale de n8n
 N8N_HOST=${ip_nas}
-N8N_WEBHOOK_URL=http://:5678
+N8N_WEBHOOK_URL=http:${ip_nas}//:5678
 N8N_PROTOCOL=http
 N8N_SECURE_COOKIE=false
 N8N_GENERIC_TIMEZONE=Europe/Paris
@@ -97,8 +97,8 @@ services:
         condition: service_healthy
 EOF
 
-sudo chown :N8Nuser n8n_data/ n8n_files 
-sudo chmod 755 "$N8N_UID:$N8N_GID" n8n_data/ n8n_files 
+sudo chown -R "$N8N_UID:$N8N_GID" n8n_data/ n8n_files 
+sudo chmod 755  n8n_data/ n8n_files 
 sudo chmod 600 .env
 
 sudo docker compose up -d
