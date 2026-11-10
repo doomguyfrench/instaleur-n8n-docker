@@ -1,9 +1,10 @@
+#!/usr/bin/env bash
+set -euo pipefail
 echo "voici l instaltion de n8n "
 
 echo "VOUS DEVEZ INSTALLEZ DABORT LE SCRIPT DE NAS "
 sudo apt update -y
 sudo apt upgrade -y
-set -euo pipefail
 ip_nas=$(hostname -I | awk '{print $1}')
 
 username_system="${SUDO_USER:-$(whoami)}" 
@@ -13,12 +14,14 @@ sudo groupadd  N8Nuser
 sudo usermod -aG N8Nuser "$username_system"
 
 N8N_UID=$(docker run --rm --entrypoint id docker.n8n.io/n8nio/n8n -u)
-N8N_UID=$(docker run --rm --entrypoint id docker.n8n.io/n8nio/n8n -g)
+N8N_GID=$(docker run --rm --entrypoint id docker.n8n.io/n8nio/n8n -g)
+
+
 
 echo "n8n UID: $N8N_UID"
 echo "n8n GID: $N8N_GID"
 
-PASSWORD=$(openssl rand _hex 32)
+PASSWORD=$(openssl rand -hex 32)
 
 mkdir -p "/home/$username_system/docker/n8n"
 mkdir -p /home/$username_system/docker/n8n/{postgresql,n8n_data,n8n_files}
@@ -27,9 +30,8 @@ touch .env
 cat > .env << EOF
 ---
 # Configuration globale de n8n
-N8N_HOST=
-N8N_WEBHOOK_URL=${ip_nas}
-N8N_WEBHOOK_TUNNEL_URL=http://${ip_nas}:5678
+N8N_HOST=${ip_nas}
+N8N_WEBHOOK_URL=http://:5678
 N8N_PROTOCOL=http
 N8N_SECURE_COOKIE=false
 N8N_GENERIC_TIMEZONE=Europe/Paris
@@ -79,7 +81,6 @@ services:
       N8N_ENFORCE_SETTINGS_FILE_PERMISSIONS: true
       NODE_ENV: production
       WEBHOOK_URL: ${N8N_WEBHOOK_URL}
-      WEBHOOK_TUNNEL_URL: ${N8N_WEBHOOK_TUNNEL_URL}
       GENERIC_TIMEZONE: ${N8N_GENERIC_TIMEZONE}
       TZ: ${N8N_GENERIC_TIMEZONE}
       DB_TYPE: postgresdb
@@ -96,8 +97,8 @@ services:
         condition: service_healthy
 EOF
 
-sudo chown :N8Nuser n8n_data/ n8n_files postgresql
-sudo chmod 755 n8n_data/ n8n_files postgresql
+sudo chown :N8Nuser n8n_data/ n8n_files 
+sudo chmod 755 "$N8N_UID:$N8N_GID" n8n_data/ n8n_files 
 sudo chmod 600 .env
 
 sudo docker compose up -d
