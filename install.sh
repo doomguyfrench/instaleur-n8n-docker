@@ -16,7 +16,7 @@ sudo groupadd -f N8Nuser
 
 N8N_UID=$(docker run --rm --entrypoint id docker.n8n.io/n8nio/n8n -u)
 N8N_GID=$(docker run --rm --entrypoint id docker.n8n.io/n8nio/n8n -g)
-N8N_GROUP_ID=$(getnet group N8Nuser | cut -d: -f3)
+N8N_GROUP_ID=$(getent group N8Nuser | cut -d: -f3)
 
 
 echo "n8n UID: $N8N_UID"
@@ -83,7 +83,7 @@ services:
     ports:
       - "5678:5678"
     group_add:
-      -"${N8N_GROUP¨_ID}"
+      - "${N8N_GROUP_ID}"
     environment:
       N8N_HOST: ${N8N_HOST}
       N8N_PORT: 5678
