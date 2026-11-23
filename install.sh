@@ -110,7 +110,7 @@ services:
         condition: service_healthy
 EOF
 
-sudo chown -R "$N8N_UID:$N8N_GROUP_ID" n8n_data/ n8n_files 
+sudo chown -R "$N8N_UID":"$N8N_GROUP_ID" n8n_data/ n8n_files 
 sudo chmod 2770  n8n_data/ n8n_files 
 sudo chmod 600 .env
 
